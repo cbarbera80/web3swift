@@ -1,3 +1,7 @@
+#if canImport(FoundationNetworking)
+import FoundationNetworking
+#endif
+
 //
 //  Async+BackwardCapability.swift
 //
@@ -6,6 +10,10 @@
 //
 
 import Foundation
+#if canImport(FoundationNetworking)
+import FoundationNetworking
+#endif
+
 
 extension URLSession {
     func data(forHTTP request: URLRequest) async throws -> (Data, HTTPURLResponse) {
