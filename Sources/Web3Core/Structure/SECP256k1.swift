@@ -353,15 +353,19 @@ extension SECP256K1 {
             }
             if let res = result, res == errSecSuccess {
                 return data
+            } else {
+                continue
             }
         }
         return nil
 #else
-        var rng = SystemRandomNumberGenerator()
-        var data = Data(repeating: 0, count: length)
-        data.withUnsafeMutableBytes { buf in
-            guard let base = buf.baseAddress?.assumingMemoryBound(to: UInt8.self) else { return }
-            for i in 0..<length { base[i] = UInt8.random(in: 0...255, using: &rng) }
+        guard let fileHandle = FileHandle(forReadingAtPath: "/dev/urandom") else {
+            return nil
+        }
+        defer { fileHandle.closeFile() }
+        let data = fileHandle.readData(ofLength: length)
+        guard data.count == length else {
+            return nil
         }
         return data
 #endif

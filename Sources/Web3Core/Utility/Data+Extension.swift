@@ -56,11 +56,20 @@ public extension Data {
 #if canImport(Security)
         var entropyBytes = [UInt8](repeating: 0, count: length)
         let status = SecRandomCopyBytes(kSecRandomDefault, entropyBytes.count, &entropyBytes)
-        guard status == errSecSuccess else { return nil }
+        guard status == errSecSuccess else {
+            return nil
+        }
         return Data(entropyBytes)
 #else
-        var rng = SystemRandomNumberGenerator()
-        return Data((0..<length).map { _ in UInt8.random(in: 0...255, using: &rng) })
+        guard let fileHandle = FileHandle(forReadingAtPath: "/dev/urandom") else {
+            return nil
+        }
+        defer { fileHandle.closeFile() }
+        let data = fileHandle.readData(ofLength: length)
+        guard data.count == length else {
+            return nil
+        }
+        return data
 #endif
     }
 
